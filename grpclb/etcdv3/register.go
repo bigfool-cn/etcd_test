@@ -1,4 +1,4 @@
-package main
+package etcdv3
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type ServiceRegister struct {
 }
 
 // NewServiceRegister 注册服务
-func NewServiceRegister(endpoint []string, key, val string, lease int64) (*ServiceRegister, error) {
+func NewServiceRegister(endpoint []string, serName, addr string, lease int64) (*ServiceRegister, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoint,
 		DialTimeout: 5 * time.Second,
@@ -28,8 +28,8 @@ func NewServiceRegister(endpoint []string, key, val string, lease int64) (*Servi
 
 	ser := &ServiceRegister{
 		cli: cli,
-		key: key,
-		val: val,
+		key: "/" + schema + "/" + serName + "/" + addr,
+		val: addr,
 	}
 
 	if err = ser.putKeyWithLease(lease); err != nil {
@@ -82,14 +82,4 @@ func (s *ServiceRegister) Close() error {
 	}
 	log.Println("撤销续租")
 	return nil
-}
-
-func main() {
-	var endpoint = []string{"192.168.3.21:32379"}
-	ser, err := NewServiceRegister(endpoint, "/web/node1", "127.0.0.1:8000", 5)
-	if err != nil {
-		log.Fatal("NewServiceRegister", err)
-	}
-	go ser.ListenLeaseRespChan()
-	select {}
 }
