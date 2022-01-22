@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"etcd_test/grpclb/etcdv3"
-	pb "etcd_test/grpclb/proto"
+	"etcd_test/grpclb-balancer/etcdv3"
+	pb "etcd_test/grpclb-balancer/proto"
 	"flag"
 	"fmt"
 	"log"
@@ -28,6 +28,8 @@ var EtcdEndpoints = []string{"127.0.0.1:32379"}
 
 func main() {
 	var port = flag.Int("port", 8000, "listening port")
+	var weight = flag.String("weight", "1", "balancer weight")
+
 	flag.Parse()
 	var address = fmt.Sprintf("%s:%d", Ip, *port)
 	// 监听本地端口
@@ -41,7 +43,7 @@ func main() {
 	// 在gRPC服务器注册我们的服务
 	pb.RegisterSimpleServer(grpcServer, &SimpleService{})
 	//把服务注册到etcd
-	ser, err := etcdv3.NewServiceRegister(EtcdEndpoints, SerName, address, 5)
+	ser, err := etcdv3.NewServiceRegister(EtcdEndpoints, SerName+"/"+address, *weight, 5)
 	if err != nil {
 		log.Fatalf("register service err: %v", err)
 	}

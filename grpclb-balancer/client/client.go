@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"etcd_test/grpclb/etcdv3"
-	pb "etcd_test/grpclb/proto"
+	"etcd_test/grpclb-balancer/etcdv3"
+	pb "etcd_test/grpclb-balancer/proto"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -22,7 +22,7 @@ func main() {
 	r := etcdv3.NewServiceDiscovery(EtcdEndpoints)
 	resolver.Register(r)
 	// 连接服务器
-	conn, err := grpc.Dial(fmt.Sprintf("%s://127.0.0.1/%s", r.Scheme(), SerName), grpc.WithBalancerName("round_robin"), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s://127.0.0.1/%s", r.Scheme(), SerName), grpc.WithBalancerName("weight"), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("net.Connect err: %v", err)
 	}
